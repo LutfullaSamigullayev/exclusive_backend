@@ -1,6 +1,6 @@
 import nodemailer  from "nodemailer"
 
-module.exports = async function(email: string, otp: string) {
+export const sendOtp = async(email: string, otp: string) => {
     try {
         const transport = nodemailer.createTransport({
             service: "gmail",
@@ -23,4 +23,3 @@ module.exports = async function(email: string, otp: string) {
         throw new Error("Unknown error occurred");
     }
 }
-
