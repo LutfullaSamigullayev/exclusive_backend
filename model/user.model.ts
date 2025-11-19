@@ -4,12 +4,12 @@ import sequelize from "../config/db.js";
 export class User extends Model {
   id!: number;
   first_name!: string;
-  last_name?: string;
+  last_name?: string | null;
   email!: string;
   password!: string;
   role!: string;
-  phone_number?: string;
-  otp?: number | null;
+  phone_number?: string | null;
+  otp?: string | null;
   otp_time?: number | null;
   verified?: boolean;
   created_at!: Date;
@@ -29,7 +29,8 @@ User.init(
     },
     last_name: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
+      defaultValue: null
     },
     email: {
       type: DataTypes.STRING,
@@ -46,10 +47,11 @@ User.init(
     },
     phone_number: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
+      defaultValue: null
     },
     otp: {
-      type: DataTypes.NUMBER,
+      type: DataTypes.STRING,
       allowNull: true,
       defaultValue: null
     },
