@@ -2,14 +2,15 @@ import { DataTypes, Model } from "sequelize";
 import sequelize from "../config/db.js";
 
 export class User extends Model {
+  id!: number;
   first_name!: string;
   last_name?: string;
   email!: string;
   password!: string;
   role!: string;
   phone_number?: string;
-  otp?: number;
-  otp_time?: number;
+  otp?: number | null;
+  otp_time?: number | null;
   verified?: boolean;
   created_at!: Date;
   updated_at!: Date;
