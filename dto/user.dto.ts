@@ -9,3 +9,8 @@ export interface VerifyUserDto {
   email: string;
   otp: number;
 }
+
+export interface UserLoginDto {
+  email: string;
+  password: string;
+}
