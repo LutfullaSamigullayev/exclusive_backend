@@ -146,3 +146,10 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
   }
 };
 
+export const logoutUser = async (req: Request, res: Response) => {
+  res.clearCookie("AccessToken");
+  res.clearCookie("RefreshToken");
+
+  return res.status(200).json({ message: "Chiqildi!" });
+};
+
