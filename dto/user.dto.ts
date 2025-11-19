@@ -7,7 +7,7 @@ export interface UserRegisterDto {
 
 export interface VerifyUserDto {
   email: string;
-  otp: number;
+  otp: string;
 }
 
 export interface UserLoginDto {
