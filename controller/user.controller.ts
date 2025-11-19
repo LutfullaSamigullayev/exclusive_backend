@@ -100,3 +100,27 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
+export const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) return res.status(400).json({ message: "Email topilmadi!" });
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp_time = Date.now() + 2 * 60 * 1000;
+
+    user.otp = otp;
+    user.otp_time = otp_time;
+    await user.save();
+
+    await sendOtp(email, otp);
+
+    return res.status(200).json({ message: "Emailga kod yuborildi!" });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+
