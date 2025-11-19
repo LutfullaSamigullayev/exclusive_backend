@@ -26,4 +26,8 @@ export class CustomErrorHandler extends Error {
   static NotFound(message: string, errors: any[] = []) {
     return new CustomErrorHandler(404, message, errors);
   }
+
+  static ServerError(message: string, errors: any[] = []) {
+    return new CustomErrorHandler(500, message, errors);
+  }
 }
