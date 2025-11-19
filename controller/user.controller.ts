@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { User } from "../model/user.model.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/token.js";
 import { sendOtp } from "../utils/send-otp.js";
-import type { UserLoginDto, UserRegisterDto, VerifyUserDto } from "../dto/user.dto.js";
+import type { ResetPasswordDto, UserEmailDto, UserLoginDto, UserRegisterDto, VerifyUserDto } from "../dto/user.dto.js";
 
 export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -102,7 +102,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
 
 export const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email } = req.body;
+    const { email } = req.body as UserEmailDto;
 
     const user = await User.findOne({ where: { email } });
     if (!user) return res.status(400).json({ message: "Email topilmadi!" });
@@ -123,4 +123,26 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
   }
 };
 
+export const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email, otp, new_password } = req.body as ResetPasswordDto;
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) return res.status(400).json({ message: "Email topilmadi!" });
+
+    if (user.otp !== otp) return res.status(400).json({ message: "Kod noto‘g‘ri!" });
+    if (Date.now() > user.otp_time!) return res.status(400).json({ message: "Kod muddati tugagan!" });
+
+    user.password = await bcrypt.hash(new_password, 12);
+    user.otp = null;
+    user.otp_time = null;
+
+    await user.save();
+
+    return res.status(200).json({ message: "Parol yangilandi!" });
+
+  } catch (error) {
+    next(error);
+  }
+};
 
