@@ -3,10 +3,11 @@ import bcrypt from "bcryptjs";
 import { User } from "../model/user.model.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/token.js";
 import { sendOtp } from "../utils/send-otp.js";
+import type { UserRegisterDto, VerifyUserDto } from "../dto/user.dto.js";
 
 export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { first_name, last_name, email, password } = req.body;
+    const { first_name, last_name, email, password } = req.body as UserRegisterDto;
 
     const existingEmail = await User.findOne({ where: { email } });
     if (existingEmail) {
@@ -36,3 +37,38 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
     next(error);
   }
 };
+
+export const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email, otp } = req.body as VerifyUserDto;
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) return res.status(404).json({ message: "Email topilmadi" });
+
+    if (user.otp !== otp) {
+      return res.status(400).json({ message: "Kod noto'g'ri!" });
+    }
+
+    if (Date.now() > user.otp_time!) {
+      return res.status(400).json({ message: "Kod muddati tugagan" });
+    }
+
+    user.verified = true;
+    user.otp = null;
+    user.otp_time = null;
+    await user.save();
+
+    const payload = { id: user.id, email: user.email, role: user.role };
+    const access = generateAccessToken(payload);
+    const refresh = generateRefreshToken(payload);
+
+    res.cookie("AccessToken", access, { httpOnly: true, maxAge: 15 * 60 * 1000 });
+    res.cookie("RefreshToken", refresh, { httpOnly: true, maxAge: 15 * 24 * 60 * 60 * 1000 });
+
+    return res.status(200).json({ message: "Tasdiqlandi!", token: access });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
