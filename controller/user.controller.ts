@@ -10,7 +10,7 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
     const { first_name, last_name, email, password } = req.body as UserRegisterDto;
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otp_time = Date.now() + 2 * 60 * 1000;
+    const otp_time = Date.now() + 5 * 60 * 1000;
 
     const hashed = await bcrypt.hash(password, 12);
 
@@ -125,7 +125,7 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
     if (!user) return res.status(400).json({ message: "Email topilmadi!" });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otp_time = Date.now() + 2 * 60 * 1000;
+    const otp_time = Date.now() + 5 * 60 * 1000;
 
     user.otp = otp;
     user.otp_time = otp_time;
