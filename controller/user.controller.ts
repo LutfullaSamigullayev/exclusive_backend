@@ -5,8 +5,6 @@ import { generateAccessToken, generateRefreshToken } from "../utils/token.js";
 import { sendOtp } from "../utils/send-otp.js";
 import type { ResetPasswordDto, UserEmailDto, UserLoginDto, UserRegisterDto, VerifyUserDto } from "../dto/user.dto.js";
 
-User.sync({force: false})
-
 export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { first_name, last_name, email, password } = req.body as UserRegisterDto;
@@ -155,3 +153,30 @@ export const logoutUser = async (req: Request, res: Response) => {
   return res.status(200).json({ message: "Chiqildi!" });
 };
 
+export const toAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email } = req.body;
+    const requester = req.user;
+
+    if (!requester) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    if (requester.role !== "super_admin") {
+      return res.status(403).json({ message: "Siz super admin emassiz!" });
+    }
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ message: "Foydalanuvchi topilmadi!" });
+    }
+
+    user.role = "admin";
+    await user.save();
+
+    return res.status(200).json({ message: "User admin qilindi!" });
+
+  } catch (error) {
+    next(error);
+  }
+};
