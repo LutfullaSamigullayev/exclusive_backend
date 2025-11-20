@@ -180,3 +180,23 @@ export const toAdmin = async (req: Request, res: Response, next: NextFunction) =
     next(error);
   }
 };
+
+export const refreshAccessToken = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = req.user; // Middleware orqali keladi
+    if (!user) return res.status(401).json({ message: "Token yaroqsiz" });
+
+    const access = generateAccessToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    res.cookie("AccessToken", access, { httpOnly: true, maxAge: 15 * 60 * 1000 });
+
+    return res.status(200).json({ message: "Yangi token yaratildi", access });
+
+  } catch (error) {
+    next(error);
+  }
+};
