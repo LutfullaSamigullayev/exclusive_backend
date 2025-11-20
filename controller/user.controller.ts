@@ -5,6 +5,8 @@ import { generateAccessToken, generateRefreshToken } from "../utils/token.js";
 import { sendOtp } from "../utils/send-otp.js";
 import type { ResetPasswordDto, UserEmailDto, UserLoginDto, UserRegisterDto, VerifyUserDto } from "../dto/user.dto.js";
 
+User.sync({force: false})
+
 export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { first_name, last_name, email, password } = req.body as UserRegisterDto;
