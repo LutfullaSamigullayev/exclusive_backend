@@ -2,18 +2,18 @@ import { DataTypes, Model } from "sequelize";
 import sequelize from "../config/db.js";
 
 export class User extends Model {
-  id!: number;
-  first_name!: string;
-  last_name?: string | null;
-  email!: string;
-  password!: string;
-  role!: string;
-  phone_number?: string | null;
-  otp?: string | null;
-  otp_time?: number | null;
-  verified?: boolean;
-  created_at!: Date;
-  updated_at!: Date;
+  declare id: number;
+  declare first_name: string;
+  declare last_name: string | null;
+  declare email: string;
+  declare password: string;
+  declare role: string;
+  declare phone_number: string | null;
+  declare otp: string | null;
+  declare otp_time: number | null;
+  declare verified: boolean;
+  declare readonly created_at: Date;
+  declare readonly updated_at: Date;
 }
 
 User.init(
