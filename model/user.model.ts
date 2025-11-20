@@ -56,7 +56,7 @@ User.init(
       defaultValue: null
     },
     otp_time: {
-      type: DataTypes.NUMBER,
+      type: DataTypes.BIGINT,
       allowNull: true,
       defaultValue: null
     },
@@ -65,18 +65,11 @@ User.init(
       allowNull: true,
       defaultValue: false
     },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    updated_at: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
   },
   {
     tableName: "user",
     timestamps: true,
+    underscored: true,
     sequelize: sequelize,
   }
 );
