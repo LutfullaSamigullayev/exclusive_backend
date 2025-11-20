@@ -9,15 +9,29 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
   try {
     const { first_name, last_name, email, password } = req.body as UserRegisterDto;
 
-    const existingEmail = await User.findOne({ where: { email } });
-    if (existingEmail) {
-      return res.status(400).json({ message: "Bu email band!" });
-    }
-
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otp_time = Date.now() + 2 * 60 * 1000;
 
     const hashed = await bcrypt.hash(password, 12);
+
+    const existingEmail = await User.findOne({ where: { email } });
+    if (existingEmail) {
+      if (existingEmail.verified) {
+        return res.status(400).json({ message: "Bu email band!" });
+      }
+
+      existingEmail.first_name = first_name;
+      existingEmail.last_name = last_name ?? null;
+      existingEmail.password = hashed;
+      existingEmail.otp = otp;
+      existingEmail.otp_time = otp_time;
+      existingEmail.verified = false;
+
+      await existingEmail.save();
+      await sendOtp(email, otp);
+
+      return res.status(200).json({ message: "Ro'yxatdan o'tish yakunlanmagan edi. Yangi kod yuborildi." });
+    }
 
     await User.create({
       first_name,
@@ -41,11 +55,12 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
 export const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, otp } = req.body as VerifyUserDto;
+    const normalizedOtp = String(otp).trim();
 
     const user = await User.findOne({ where: { email } });
     if (!user) return res.status(404).json({ message: "Email topilmadi" });
 
-    if (user.otp !== otp) {
+    if (user.otp !== normalizedOtp) {
       return res.status(400).json({ message: "Kod noto'g'ri!" });
     }
 
@@ -126,11 +141,12 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
 export const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, otp, new_password } = req.body as ResetPasswordDto;
+    const normalizedOtp = String(otp).trim();
 
     const user = await User.findOne({ where: { email } });
     if (!user) return res.status(400).json({ message: "Email topilmadi!" });
 
-    if (user.otp !== otp) return res.status(400).json({ message: "Kod noto‘g‘ri!" });
+    if (user.otp !== normalizedOtp) return res.status(400).json({ message: "Kod noto‘g‘ri!" });
     if (Date.now() > user.otp_time!) return res.status(400).json({ message: "Kod muddati tugagan!" });
 
     user.password = await bcrypt.hash(new_password, 12);
@@ -155,8 +171,7 @@ export const logoutUser = async (req: Request, res: Response) => {
 
 export const toAdmin = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email } = req.body;
-    const requester = req.user!;
+    const { email } = req.body as UserEmailDto;
 
     const user = await User.findOne({ where: { email } });
     if (!user) {
@@ -175,8 +190,7 @@ export const toAdmin = async (req: Request, res: Response, next: NextFunction) =
 
 export const toSeller = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email } = req.body;
-    const requester = req.user!;
+    const { email } = req.body as UserEmailDto;
 
     const user = await User.findOne({ where: { email } });
     if (!user) {
