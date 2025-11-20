@@ -3,11 +3,17 @@ import jwt from "jsonwebtoken";
 import type { JwtPayload } from "jsonwebtoken";
 import { CustomErrorHandler } from "../error/custom-error-handler.js";
 
+type AuthPayload = JwtPayload & {
+  id: number;
+  email: string;
+  role: string;
+};
+
 // Requestga user fieldini qo‘shish
 declare global {
   namespace Express {
     interface Request {
-      user?: string | JwtPayload;
+      user?: AuthPayload;
     }
   }
 }
@@ -34,11 +40,11 @@ export const authorization = (req: Request, res: Response, next: NextFunction) =
           return next(CustomErrorHandler.Forbidden("Token noto'g'ri yoki muddati tugagan"));
         }
 
-        if (!decoded) {
+        if (!decoded || typeof decoded === "string") {
           return next(CustomErrorHandler.Forbidden("Token noto'g'ri"));
         }
 
-        req.user = decoded; // endi decoded undefined emas → TS xato bermaydi
+        req.user = decoded as AuthPayload;
         next();
       }
     );
