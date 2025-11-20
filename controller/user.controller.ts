@@ -60,7 +60,9 @@ export const verifyUser = async (req: Request, res: Response, next: NextFunction
     const user = await User.findOne({ where: { email } });
     if (!user) return res.status(404).json({ message: "Email topilmadi" });
 
-    if (user.otp !== normalizedOtp) {
+    const storedOtp = user.otp ? user.otp.toString().trim() : null;
+
+    if (!storedOtp || storedOtp !== normalizedOtp) {
       return res.status(400).json({ message: "Kod noto'g'ri!" });
     }
 
@@ -146,7 +148,9 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
     const user = await User.findOne({ where: { email } });
     if (!user) return res.status(400).json({ message: "Email topilmadi!" });
 
-    if (user.otp !== normalizedOtp) return res.status(400).json({ message: "Kod noto‘g‘ri!" });
+    const storedOtp = user.otp ? user.otp.toString().trim() : null;
+
+    if (!storedOtp || storedOtp !== normalizedOtp) return res.status(400).json({ message: "Kod noto‘g‘ri!" });
     if (Date.now() > user.otp_time!) return res.status(400).json({ message: "Kod muddati tugagan!" });
 
     user.password = await bcrypt.hash(new_password, 12);
