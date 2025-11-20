@@ -181,6 +181,34 @@ export const toAdmin = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
+export const toSeller = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email } = req.body;
+    const requester = req.user;
+
+    if (!requester) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    if (!["admin", "super_admin"].includes(requester.role)) {
+      return res.status(403).json({ message: "Sizda seller qilish huquqi yo'q!" });
+    }
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ message: "Foydalanuvchi topilmadi!" });
+    }
+
+    user.role = "seller";
+    await user.save();
+
+    return res.status(200).json({ message: "User seller qilindi!" });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const refreshAccessToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user; // Middleware orqali keladi
