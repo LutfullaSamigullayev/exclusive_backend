@@ -156,15 +156,7 @@ export const logoutUser = async (req: Request, res: Response) => {
 export const toAdmin = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email } = req.body;
-    const requester = req.user;
-
-    if (!requester) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
-    if (requester.role !== "super_admin") {
-      return res.status(403).json({ message: "Siz super admin emassiz!" });
-    }
+    const requester = req.user!;
 
     const user = await User.findOne({ where: { email } });
     if (!user) {
@@ -184,15 +176,7 @@ export const toAdmin = async (req: Request, res: Response, next: NextFunction) =
 export const toSeller = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email } = req.body;
-    const requester = req.user;
-
-    if (!requester) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
-    if (!["admin", "super_admin"].includes(requester.role)) {
-      return res.status(403).json({ message: "Sizda seller qilish huquqi yo'q!" });
-    }
+    const requester = req.user!;
 
     const user = await User.findOne({ where: { email } });
     if (!user) {
@@ -211,8 +195,7 @@ export const toSeller = async (req: Request, res: Response, next: NextFunction) 
 
 export const refreshAccessToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = req.user; // Middleware orqali keladi
-    if (!user) return res.status(401).json({ message: "Token yaroqsiz" });
+    const user = req.user!; // Middleware orqali keladi
 
     const access = generateAccessToken({
       id: user.id,
