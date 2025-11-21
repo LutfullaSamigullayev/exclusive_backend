@@ -223,7 +223,7 @@ export const refreshAccessToken = async (req: Request, res: Response, next: Next
 
     res.cookie("AccessToken", access, { httpOnly: true, maxAge: 15 * 60 * 1000 });
 
-    return res.status(200).json({ message: "Yangi token yaratildi", access });
+    return res.status(200).json({ message: "Yangi token yaratildi", token: access });
 
   } catch (error) {
     next(error);
