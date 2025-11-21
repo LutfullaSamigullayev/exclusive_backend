@@ -14,6 +14,4 @@ const sequelize = new Sequelize({
 
 sequelize.authenticate().then(()=> console.log("Connected to DB")).catch((error) => console.log(error.message))
 
-sequelize.sync({force: false})
-
 export default sequelize
